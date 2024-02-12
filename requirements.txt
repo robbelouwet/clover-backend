@@ -1,2 +1,6 @@
 azure-cli
 flask
+flask[async]
+flask-cors
+azure-storage-file-share
+python-dotenv

@@ -1,0 +1,18 @@
+GET http://localhost:5000/list-dir?path=/&share=fs-paper-robbe2
+Accept: application/json
+
+###
+
+POST http://localhost:5000/upsert-file?filepath=/world/test.txt&share=fs-paper-robbe2
+Content-Type: application/octet-stream
+
+Test5
+
+###
+
+GET http://localhost:5000/get-file?filepath=server.properties&share=fs-paper-robbe2
+Accept: text/plain
+
+###
+
+GET http://paper-backend-server--3lajziv.wittypond-0c974e4c.westeurope.azurecontainerapps.io/deploy-dedicated?cpu=1&memory=2&servername=robbe
