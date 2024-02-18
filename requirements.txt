@@ -1,9 +1,9 @@
 azure-cli==2.57.0
-flask
+flask==3.0.2
 flask[async]
-flask-cors
-azure-storage-file-share
-azure-cosmos==4.5.1
-azure-identity
-python-dotenv
-b64
+flask-cors==4.0.0
+azure-storage-file-share==12.15.0
+azure-cosmos==3.0.2
+azure-identity==1.15.0
+python-dotenv==1.0.1
+b64==0.4
