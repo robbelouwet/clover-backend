@@ -14,7 +14,7 @@ Icon
 # Thumbnails
 ._*
 
-# Files that might appear in the root of a volume
+# Files that might appear in t97TvGCALH20BK2bgQwaGK5UOD78hgZmiUN33082PZO7s4hGFbPQNyJdrlvwZeMOfIDWYam4jVorpACDb2sko5A==he root of a volume
 .DocumentRevisions-V100
 .fseventsd
 .Spotlight-V100
@@ -157,6 +157,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+*.env
 .env
 .venv
 env/

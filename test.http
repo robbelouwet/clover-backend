@@ -15,4 +15,4 @@ Accept: text/plain
 
 ###
 
-GET http://paper-backend-server--3lajziv.wittypond-0c974e4c.westeurope.azurecontainerapps.io/deploy-dedicated?cpu=1&memory=2&servername=robbe
+GET http://localhost:5000/deploy-dedicated?cpu=1&memory=2&servername=robbe

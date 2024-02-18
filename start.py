@@ -8,7 +8,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from pathlib import Path
 
-# load_dotenv(dotenv_path=Path('.dev.env'))
+load_dotenv(dotenv_path=Path('.dev.env'))
 
 app = Flask(__name__)
 
