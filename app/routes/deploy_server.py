@@ -1,31 +1,25 @@
-import base64
-import logging
 import os
 import uuid
-
-from flask import Blueprint, request, jsonify, make_response, json
+from flask import Blueprint, request, jsonify, make_response
 from flask_cors import cross_origin
 import random
-from azure.cli.core import get_default_cli
-
-from app.routes.common import get_cosmos_client, parse_principal_name_identifier
+from app.logic.arm_store import az_cli
+from app.logic.cosmos_store import create_server_entity
+from app.logic.utils import allowed_values
 
 deploy_server = Blueprint("deploy_dedicated_bp", __name__)
-
-# Allowed values according to Azure Container Apps consumption profiles
-allowed_values = [[0.5, 1], [1, 2], [1.5, 3], [2, 4]]
 
 
 @deploy_server.route('/deploy-dedicated')
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
-    # logging.info(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    # print(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
     # # Validate google service principal authentication
     # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
     # google_name_identifier = parse_principal_name_identifier(client_principal)
     #
-    # logging.info(f"google_nameidentifier: {google_name_identifier}")
-    # if not google_name_identifier: return jsonify({}), 401
+    # print(f"google_nameidentifier: {google_name_identifier}")
+    # # if not google_name_identifier: return jsonify({}), 401
 
     # Parse & set up deployment params
     memory = int(request.args.get("memory"))
@@ -58,40 +52,23 @@ def deploy_dedicated():
         return make_response({}, 200) if response else make_response({}, 500)
 
     # Upload server data to cosmos
-    create_server_entity(
-        server_host=response["properties"]["outputs"]["host"]["value"],
-        google_name_identifier="robbelouwet",  # google_name_identifier,
-        server_port=port,
-        share=response["properties"]["outputs"]["shareName"]["value"]
-    )
+    user_id = str(uuid.uuid4())
+    create_server_entity({
+        "id": user_id,
+        "server_name": servername,
+        "user_name": "robbelouwet",  # google_name_identifier
+        "server_host": response["properties"]["outputs"]["host"]["value"],
+        "server_port": port,
+        "st_acc_name": response["properties"]["outputs"]["stAccName"]["value"],
+        "share": response["properties"]["outputs"]["shareName"]["value"],
+        "capp_env_name": capp_env,
+        "capp_name": response["properties"]["outputs"]["cappName"]["value"],
+        "st_def_name": response["properties"]["outputs"]["stDefName"]["value"]
+    })
 
     # Return response
     return jsonify({
+        'id': user_id,
         'deployment_name': deployment_name,
         'server': response["properties"]["outputs"]["host"]["value"]
     }), 200
-
-
-def create_server_entity(server_host, server_port, google_name_identifier, share):
-    client = get_cosmos_client()
-    container = client \
-        .get_database_client(os.environ.get("COSMOS_DB_NAME")) \
-        .get_container_client(os.environ.get("COSMOS_CONTAINER_NAME"))
-
-    container.upsert_item({
-        "id": str(uuid.uuid4()),
-        "serverHost": server_host,
-        "port": server_port,
-        "google_name_identifier": google_name_identifier,
-        "share": share
-    })
-
-def az_cli(args_str):
-    args = args_str.split()
-    cli = get_default_cli()
-    cli.invoke(args)
-    if cli.result.result:
-        return cli.result.result
-    elif cli.result.error:
-        raise cli.result.error
-    return True

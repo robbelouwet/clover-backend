@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.24.24.22086",
-      "templateHash": "11582038459320544363"
+      "templateHash": "5722801526469944518"
     }
   },
   "parameters": {
@@ -46,13 +46,15 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "fileShareName": "[format('fs-{0}-{1}', parameters('appName'), parameters('servername'))]"
+    "fileShareName": "[format('fs-{0}-{1}', parameters('appName'), parameters('servername'))]",
+    "stDefName": "[format('st-def-{0}-{1}', parameters('appName'), parameters('servername'))]",
+    "cappName": "[format('capp-{0}-{1}-server', parameters('appName'), parameters('servername'))]"
   },
   "resources": [
     {
       "type": "Microsoft.App/managedEnvironments/storages",
       "apiVersion": "2023-05-01",
-      "name": "[format('{0}/{1}', parameters('cappEnvName'), format('st-def-{0}-{1}', parameters('appName'), parameters('servername')))]",
+      "name": "[format('{0}/{1}', parameters('cappEnvName'), variables('stDefName'))]",
       "properties": {
         "azureFile": {
           "accessMode": "ReadWrite",
@@ -68,7 +70,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2023-05-02-preview",
-      "name": "[format('capp-{0}-{1}-server', parameters('appName'), parameters('servername'))]",
+      "name": "[variables('cappName')]",
       "location": "[variables('location')]",
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('cappEnvName'))]",
@@ -135,13 +137,13 @@
             {
               "name": "[variables('fileShareName')]",
               "storageType": "AzureFile",
-              "storageName": "[format('st-def-{0}-{1}', parameters('appName'), parameters('servername'))]"
+              "storageName": "[variables('stDefName')]"
             }
           ]
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments/storages', parameters('cappEnvName'), format('st-def-{0}-{1}', parameters('appName'), parameters('servername')))]"
+        "[resourceId('Microsoft.App/managedEnvironments/storages', parameters('cappEnvName'), variables('stDefName'))]"
       ]
     },
     {
@@ -619,11 +621,27 @@
   "outputs": {
     "host": {
       "type": "string",
-      "value": "[format('{0}:{1}', reference(resourceId('Microsoft.App/containerApps', format('capp-{0}-{1}-server', parameters('appName'), parameters('servername'))), '2023-05-02-preview').configuration.ingress.fqdn, reference(resourceId('Microsoft.App/containerApps', format('capp-{0}-{1}-server', parameters('appName'), parameters('servername'))), '2023-05-02-preview').configuration.ingress.exposedPort)]"
+      "value": "[format('{0}:{1}', reference(resourceId('Microsoft.App/containerApps', variables('cappName')), '2023-05-02-preview').configuration.ingress.fqdn, reference(resourceId('Microsoft.App/containerApps', variables('cappName')), '2023-05-02-preview').configuration.ingress.exposedPort)]"
+    },
+    "cappName": {
+      "type": "string",
+      "value": "[variables('cappName')]"
     },
     "shareName": {
       "type": "string",
       "value": "[variables('fileShareName')]"
+    },
+    "stDefName": {
+      "type": "string",
+      "value": "[variables('stDefName')]"
+    },
+    "cappEnvName": {
+      "type": "string",
+      "value": "[parameters('cappEnvName')]"
+    },
+    "stAccName": {
+      "type": "string",
+      "value": "[parameters('storageName')]"
     }
   }
 }

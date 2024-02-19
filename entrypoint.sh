@@ -1,6 +1,8 @@
 #!/bin/bash
 
-az login --identity
+export APPSETTING_WEBSITE_SITE_NAME=DUMMY
+
+az login -i --allow-no-subscription
 
 az account show
 
