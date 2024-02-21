@@ -2,8 +2,8 @@ import os
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 
-from app.logic.arm_store import az_cli, find_user_server
-from app.logic.cosmos_store import delete_server_entity
+from app.logic.cosmos_store import delete_server_entity, find_user_server
+from app.logic.utils import az_cli
 
 delete_server = Blueprint("delete_dedicated_bp", __name__)
 

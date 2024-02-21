@@ -3,9 +3,8 @@ import uuid
 from flask import Blueprint, request, jsonify, make_response
 from flask_cors import cross_origin
 import random
-from app.logic.arm_store import az_cli
 from app.logic.cosmos_store import create_server_entity
-from app.logic.utils import allowed_values
+from app.logic.utils import allowed_values, az_cli
 
 deploy_server = Blueprint("deploy_dedicated_bp", __name__)
 
@@ -57,7 +56,7 @@ def deploy_dedicated():
         "id": user_id,
         "server_name": servername,
         "user_name": "robbelouwet",  # google_name_identifier
-        "server_host": response["properties"]["outputs"]["host"]["value"],
+        "server_host": ':'.split(response["properties"]["outputs"]["host"]["value"])[0],
         "server_port": port,
         "st_acc_name": response["properties"]["outputs"]["stAccName"]["value"],
         "share": response["properties"]["outputs"]["shareName"]["value"],
