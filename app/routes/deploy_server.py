@@ -1,10 +1,11 @@
 import os
 import uuid
-from flask import Blueprint, request, jsonify, make_response
+import base64
+from flask import Blueprint, request, jsonify, make_response, json
 from flask_cors import cross_origin
 import random
 from app.logic.cosmos_store import create_server_entity
-from app.logic.utils import allowed_values, az_cli
+from app.logic.utils import allowed_values, az_cli, parse_principal_name_identifier
 
 deploy_server = Blueprint("deploy_dedicated_bp", __name__)
 
@@ -12,13 +13,13 @@ deploy_server = Blueprint("deploy_dedicated_bp", __name__)
 @deploy_server.route('/deploy-dedicated')
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
-    # print(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
-    # # Validate google service principal authentication
-    # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    # google_name_identifier = parse_principal_name_identifier(client_principal)
-    #
-    # print(f"google_nameidentifier: {google_name_identifier}")
-    # # if not google_name_identifier: return jsonify({}), 401
+    print(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    # Validate google service principal authentication
+    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
+
+    print(f"google_nameidentifier: {google_name_identifier}")
+    # if not google_name_identifier: return jsonify({}), 401
 
     # Parse & set up deployment params
     memory = int(request.args.get("memory"))
