@@ -1,6 +1,6 @@
 import io
 import os
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response, current_app
 from flask_cors import cross_origin
 from azure.storage.fileshare import ShareFileClient, ShareDirectoryClient
 
@@ -20,7 +20,7 @@ def list_dir():
 
     share = request.args.get('share')
 
-    print(f"path: {path}, share: {share}")
+    current_app.logger.info(f"path: {path}, share: {share}")
 
     parent_dir = ShareDirectoryClient.from_connection_string(
         conn_str=conn_string,
@@ -46,7 +46,7 @@ def get_file():
     if len(file_path) >= 1 and file_path[0] == '/':
         file_path = file_path[1:]
 
-    print(f"path: {file_path}, share: {share}")
+    current_app.logger.info(f"path: {file_path}, share: {share}")
 
     file_client = ShareFileClient.from_connection_string(
         conn_str=conn_string, share_name=share, file_path=file_path)
@@ -67,7 +67,7 @@ def upsert_file():
     file_path = request.args.get('filepath')
     share = request.args.get('share')
 
-    print(f"path: {file_path}, share: {share}")
+    current_app.logger.info(f"path: {file_path}, share: {share}")
 
     if len(file_path) >= 1 and file_path[0] == '/':
         file_path = file_path[1:]

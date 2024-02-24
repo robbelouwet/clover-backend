@@ -1,6 +1,6 @@
 import os
 import base64
-from flask import Blueprint, request, jsonify, json
+from flask import Blueprint, request, jsonify, json, current_app
 from flask_cors import cross_origin
 
 from app.logic.cosmos_store import delete_server_entity, find_user_server
@@ -12,12 +12,12 @@ delete_server = Blueprint("delete_dedicated_bp", __name__)
 @delete_server.route('/delete-dedicated')
 @cross_origin(supports_credentials=True)
 def delete_dedicated():
-    print(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    current_app.logger.info(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
     # Validate google service principal authentication
-    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = parse_principal_name_identifier(client_principal)
+    # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = "robbelouwet"  # parse_principal_name_identifier(client_principal)
 
-    print(f"google_nameidentifier: {google_name_identifier}")
+    current_app.logger.info(f"google_nameidentifier: {google_name_identifier}")
     # if not google_name_identifier: return jsonify({}), 401
 
     # user = find_by_google_name_identifier(google_name_identifier)
@@ -27,7 +27,7 @@ def delete_dedicated():
 
     # Delete the container
     command1 = f'containerapp delete -g {rg} -n {user_server["capp_name"]} --yes'
-    print(f"executing: {command1}")
+    current_app.logger.info(f"executing: {command1}")
     az_cli(command1)
 
     # Delete the file share
@@ -35,7 +35,7 @@ def delete_dedicated():
                f'--account-name {user_server["st_acc_name"]} ' + \
                f'--name {user_server["share"]} ' + \
                f'--fail-not-exist'
-    print(f"executing: {command2}")
+    current_app.logger.info(f"executing: {command2}")
     az_cli(command2)
 
     # Delete the container app env storage definition
@@ -44,7 +44,7 @@ def delete_dedicated():
                f'--resource-group {rg} ' + \
                f'--storage-name {user_server["st_def_name"]} ' + \
                f'--yes'
-    print(f"executing: {command3}")
+    current_app.logger.info(f"executing: {command3}")
     az_cli(command3)
 
     delete_server_entity(user_server["id"])
