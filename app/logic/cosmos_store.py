@@ -61,7 +61,8 @@ def find_user_server(user_id: str, server_name: str) -> dict:
         raise ValueError("Cosmos query returned multiple hits!")
     return results[0]
 
-def find_user_server() -> dict:
+
+def find_first_user_server() -> dict:
     client = get_cosmos_client()
 
     q = f'SELECT TOP 1 * FROM c'

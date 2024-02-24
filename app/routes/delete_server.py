@@ -22,7 +22,7 @@ def delete_dedicated():
 
     # user = find_by_google_name_identifier(google_name_identifier)
     servername = request.args.get("servername")
-    user_server = find_user_server("robbelouwet", servername)
+    user_server = find_user_server(google_name_identifier, servername)
     rg = os.environ.get("ST_ACC_RG")
 
     # Delete the container
