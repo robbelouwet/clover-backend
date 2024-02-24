@@ -15,8 +15,8 @@ deploy_server = Blueprint("deploy_dedicated_bp", __name__)
 def deploy_dedicated():
     print(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
     # Validate google service principal authentication
-    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = parse_principal_name_identifier(client_principal)
+    # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = "robbelouwet"  # parse_principal_name_identifier(client_principal)
 
     print(f"google_nameidentifier: {google_name_identifier}")
     # if not google_name_identifier: return jsonify({}), 401
