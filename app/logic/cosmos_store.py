@@ -24,7 +24,7 @@ def get_cosmos_client() -> CosmosClient:
     return CosmosClient(url, {'masterKey': key})
 
 
-def create_server_entity(doc):
+def upsert_server_entity(doc):
     client = get_cosmos_client()
 
     database_id = os.environ.get("COSMOS_DB_NAME")
@@ -43,10 +43,11 @@ def delete_server_entity(id: str):
                       {'partitionKey': id})
 
 
-def find_user_server(user_id: str, server_name: str) -> dict:
+def find_user_server_by_google_nameidentifier(nameidentifier: str, server_name: str):
     client = get_cosmos_client()
 
-    q = f'SELECT * FROM c WHERE c.user_name = "{user_id}" AND c.server_name = "{server_name}"'
+    q = (f'SELECT * FROM c WHERE c.primary_oauth_account.id = "{nameidentifier}" ' +
+         f'AND c.server_name = "{server_name}"')
 
     database_id = os.environ.get("COSMOS_DB_NAME")
     container_id = os.environ.get("COSMOS_SERVERS_CONTAINER_NAME")
@@ -55,10 +56,8 @@ def find_user_server(user_id: str, server_name: str) -> dict:
                                    {'enableCrossPartitionQuery': True})
 
     results = [doc for doc in result_set]
-    if len(results) == 0:
-        return None
-    elif len(results) > 1:
-        raise ValueError("Cosmos query returned multiple hits!")
+    if len(results) == 0: return None
+    elif len(results) > 1: raise ValueError("Cosmos query returned multiple hits!")
     return results[0]
 
 

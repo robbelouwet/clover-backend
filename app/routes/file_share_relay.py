@@ -1,8 +1,12 @@
+import base64
 import io
 import os
-from flask import Blueprint, request, jsonify, Response, current_app
+from flask import Blueprint, request, jsonify, Response, current_app, json
 from flask_cors import cross_origin
 from azure.storage.fileshare import ShareFileClient, ShareDirectoryClient
+
+from app.logic.cosmos_store import find_user_server_by_google_nameidentifier
+from app.logic.utils import parse_principal_name_identifier
 
 fs_relay = Blueprint("list_dir_bp", __name__)
 
@@ -62,10 +66,18 @@ def get_file():
 @fs_relay.route('/upsert-file', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def upsert_file():
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
+    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    # Validate google service principal authentication
+    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
 
+    conn_string = os.environ.get("ST_ACC_CONN_STRING")
     file_path = request.args.get('filepath')
-    share = request.args.get('share')
+    servername = request.args.get('servername')
+
+    # Get the file share
+    user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+    share = user_server["share"]
 
     current_app.logger.info(f"path: {file_path}, share: {share}")
 
@@ -79,12 +91,10 @@ def upsert_file():
     content = request.get_data(as_text=False)
 
     content_length = request.content_length
-    if content_length is not None and content_length > 2048 * 2048:  # 1 MiB
+    if content_length is not None and content_length > 2048:  # 2 KiB
         return jsonify({"error": "Request payload is too large"}), 413  # 413: Payload Too Large
 
     file_client.upload_file(data=content)
 
     return jsonify({}), 200
 
-# if __name__ == "__main__":
-#     asyncio.run(upsert_file())
