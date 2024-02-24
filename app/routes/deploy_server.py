@@ -10,10 +10,10 @@ from flask import current_app
 
 from app.routes.get_server import get_user_server
 
-deploy_server = Blueprint("deploy_dedicated_bp", __name__)
+deploy_server_bp = Blueprint("deploy_dedicated_bp", __name__)
 
 
-@deploy_server.route('/deploy-dedicated')
+@deploy_server_bp.route('/deploy-dedicated')
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
     # Authentication

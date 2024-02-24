@@ -8,10 +8,10 @@ from azure.storage.fileshare import ShareFileClient, ShareDirectoryClient
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier
 from app.logic.utils import parse_principal_name_identifier
 
-fs_relay = Blueprint("list_dir_bp", __name__)
+fs_relay_bp = Blueprint("list_dir_bp", __name__)
 
 
-@fs_relay.route('/list-dir')
+@fs_relay_bp.route('/list-dir')
 @cross_origin(supports_credentials=True)
 def list_dir():
     conn_string = os.environ.get("ST_ACC_CONN_STRING")
@@ -38,7 +38,7 @@ def list_dir():
     return jsonify(contents), 200
 
 
-@fs_relay.route('/get-file')
+@fs_relay_bp.route('/get-file')
 @cross_origin(supports_credentials=True)
 def get_file():
     conn_string = os.environ.get("ST_ACC_CONN_STRING")
@@ -63,7 +63,7 @@ def get_file():
     }), 200
 
 
-@fs_relay.route('/upsert-file', methods=['POST'])
+@fs_relay_bp.route('/upsert-file', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def upsert_file():
     current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")

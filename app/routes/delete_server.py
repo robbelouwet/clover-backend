@@ -7,10 +7,10 @@ from app.logic.arm_store import delete_user_server
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier
 from app.logic.utils import parse_principal_name_identifier
 
-delete_server = Blueprint("delete_dedicated_bp", __name__)
+delete_server_bp = Blueprint("delete_dedicated_bp", __name__)
 
 
-@delete_server.route('/delete-dedicated')
+@delete_server_bp.route('/delete-dedicated')
 @cross_origin(supports_credentials=True)
 def delete_dedicated():
     # Authentication

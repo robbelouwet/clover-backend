@@ -6,17 +6,17 @@ from flask_cors import cross_origin
 from app.logic.cosmos_store import find_first_user_server, find_user_server_by_google_nameidentifier
 from app.logic.utils import parse_principal_name_identifier
 
-# get_server = Blueprint("get_server_bp", __name__)
-get_user_server = Blueprint("get_user_server_bp", __name__)
+# get_server_bp = Blueprint("get_server_bp", __name__)
+get_user_server_bp = Blueprint("get_user_server_bp", __name__)
 
 
-# @get_server.route('/get-server')
+# @get_server_bp.route('/get-server')
 # @cross_origin(supports_credentials=True)
 # def get_default_server():
 #     return jsonify(find_first_user_server()), 200
 
 
-@get_user_server.route('/get-user-server')
+@get_user_server_bp.route('/get-user-server')
 @cross_origin(supports_credentials=True)
 def get_user_server():
     current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
