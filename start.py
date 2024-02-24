@@ -7,6 +7,7 @@ from app.routes.delete_server import delete_server
 from app.routes.deploy_server import deploy_server
 from app.routes.file_share_relay import fs_relay
 from app.routes.get_server import get_server
+from app.routes.post_login_redirect import redirect_frontend
 from flask_cors import CORS
 from dotenv import load_dotenv
 from pathlib import Path
@@ -21,6 +22,7 @@ app.register_blueprint(deploy_server)
 app.register_blueprint(delete_server)
 app.register_blueprint(fs_relay)
 app.register_blueprint(get_server)
+app.register_blueprint(redirect_frontend)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
