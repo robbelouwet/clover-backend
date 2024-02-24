@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 import base64
@@ -13,7 +14,8 @@ deploy_server = Blueprint("deploy_dedicated_bp", __name__)
 @deploy_server.route('/deploy-dedicated')
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
-    print(f"x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    print(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    logging.info(f"logger: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
     # Validate google service principal authentication
     # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
     google_name_identifier = "robbelouwet"  # parse_principal_name_identifier(client_principal)
