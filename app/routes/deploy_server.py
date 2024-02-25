@@ -46,7 +46,7 @@ def deploy_dedicated():
         "primary_oauth_account": {
             "provider": "google",
             "id": google_name_identifier,
-            "google": client_principal
+            # "google": client_principal
         },
         "oauth_accounts": []
     }

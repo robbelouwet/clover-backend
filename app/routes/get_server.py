@@ -31,9 +31,9 @@ def get_user_server():
 @cross_origin(supports_credentials=True)
 def get_user_server():
     # Authentication
-    # current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
-    # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = "117339767971594071042"  # parse_principal_name_identifier(client_principal)
+    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
     current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
 
     return jsonify(find_all_user_servers_by_google_nameidentifier(google_name_identifier)), 200
