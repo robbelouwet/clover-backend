@@ -28,4 +28,4 @@ def get_user_server():
     # Querystring param
     servername = not_none(request.args.get("servername"))
 
-    return jsonify(find_user_server_by_google_nameidentifier(google_name_identifier, servername)), 200
+    return jsonify(find_user_server_by_google_nameidentifier(google_name_identifier[1], servername)), 200

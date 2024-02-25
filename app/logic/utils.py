@@ -8,11 +8,11 @@ from app.logic.cosmos_store import get_cosmos_client
 allowed_values = [[0.5, 1], [1, 2], [1.5, 3], [2, 4]]
 
 
-def parse_principal_name_identifier(client_principal) -> (bool, str):
+def parse_principal_name_identifier(client_principal) -> str:
     for claim in client_principal["claims"]:
         if "nameidentifier" in claim["typ"]:  # This isn't a typo
-            return True, claim["val"]
-    return False, None
+            return claim["val"]
+    return None
 
 
 def az_cli(args_str):

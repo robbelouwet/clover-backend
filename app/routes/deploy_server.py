@@ -22,7 +22,7 @@ def deploy_dedicated():
     google_name_identifier = parse_principal_name_identifier(client_principal)
     current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
 
-    # Parse & set up deployment params
+    # Arguments
     memory = int(request.args.get("memory"))
     vcpu = int(request.args.get("cpu"))
     servername = not_none(request.args.get("servername"))

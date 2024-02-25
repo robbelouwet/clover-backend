@@ -8,24 +8,32 @@ from azure.storage.fileshare import ShareFileClient, ShareDirectoryClient
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier
 from app.logic.utils import parse_principal_name_identifier
 
-fs_relay_bp = Blueprint("list_dir_bp", __name__)
+fs_relay_bp = Blueprint("fs_relay_bp", __name__)
 
 
 @fs_relay_bp.route('/list-dir')
 @cross_origin(supports_credentials=True)
 def list_dir():
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
+    # Authentication
+    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
 
+    servername = request.args.get('servername')
     path = request.args.get('path')
+
     if path is None:
         path = ""
     elif len(path) >= 1 and path[0] == '/':
         path = path[1:]
 
-    share = request.args.get('share')
+    # Get the file share
+    user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+    share = user_server["share"]
 
     current_app.logger.info(f"path: {path}, share: {share}")
 
+    conn_string = os.environ.get("ST_ACC_CONN_STRING")
     parent_dir = ShareDirectoryClient.from_connection_string(
         conn_str=conn_string,
         share_name=share,
@@ -41,17 +49,22 @@ def list_dir():
 @fs_relay_bp.route('/get-file')
 @cross_origin(supports_credentials=True)
 def get_file():
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
-    print(f"conn_string: {conn_string}")
+    # Authentication
+    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
 
+    servername = request.args.get('servername')
     file_path = request.args.get('filepath')
-    share = request.args.get('share')
+
+    # Get the file share
+    user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+    share = user_server["share"]
 
     if len(file_path) >= 1 and file_path[0] == '/':
         file_path = file_path[1:]
 
-    current_app.logger.info(f"path: {file_path}, share: {share}")
-
+    conn_string = os.environ.get("ST_ACC_CONN_STRING")
     file_client = ShareFileClient.from_connection_string(
         conn_str=conn_string, share_name=share, file_path=file_path)
 
@@ -71,7 +84,6 @@ def upsert_file():
     client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
     google_name_identifier = parse_principal_name_identifier(client_principal)
 
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
     file_path = request.args.get('filepath')
     servername = request.args.get('servername')
 
@@ -84,6 +96,7 @@ def upsert_file():
     if len(file_path) >= 1 and file_path[0] == '/':
         file_path = file_path[1:]
 
+    conn_string = os.environ.get("ST_ACC_CONN_STRING")
     file_client = ShareFileClient.from_connection_string(conn_str=conn_string,
                                                          share_name=share,
                                                          file_path=file_path)
@@ -97,4 +110,3 @@ def upsert_file():
     file_client.upload_file(data=content)
 
     return jsonify({}), 200
-
