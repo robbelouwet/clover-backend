@@ -4,11 +4,9 @@ import base64
 from flask import Blueprint, request, jsonify, json
 from flask_cors import cross_origin
 from app.logic.arm_store import deploy_user_server
-from app.logic.cosmos_store import upsert_server_entity
+from app.logic.cosmos_store import upsert_server_entity, find_user_server_by_google_nameidentifier
 from app.logic.utils import allowed_values, parse_principal_name_identifier, not_none
 from flask import current_app
-
-from app.routes.get_server import get_user_server
 
 deploy_server_bp = Blueprint("deploy_dedicated_bp", __name__)
 
@@ -29,7 +27,7 @@ def deploy_dedicated():
     dry_run = request.args.get("dry-run", default=None)
 
     # Ensure that foreign key [nameidentifier, servername] doesn't already exist
-    existing = get_user_server(google_name_identifier, servername)
+    existing = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
     if existing is not None: return jsonify(
         {"error": "User already has a server with this name!"}), 400  # Upload server data to cosmos
 

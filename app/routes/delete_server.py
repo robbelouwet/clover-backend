@@ -1,4 +1,3 @@
-import os
 import base64
 from flask import Blueprint, request, jsonify, json, current_app
 from flask_cors import cross_origin
