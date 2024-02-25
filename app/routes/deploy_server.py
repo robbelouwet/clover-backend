@@ -11,7 +11,7 @@ from flask import current_app
 deploy_server_bp = Blueprint("deploy_dedicated_bp", __name__)
 
 
-@deploy_server_bp.route('/deploy-dedicated')
+@deploy_server_bp.route('/deploy-paper-dedicated')
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
     # Authentication

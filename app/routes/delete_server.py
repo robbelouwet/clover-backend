@@ -9,7 +9,7 @@ from app.logic.utils import parse_principal_name_identifier
 delete_server_bp = Blueprint("delete_dedicated_bp", __name__)
 
 
-@delete_server_bp.route('/delete-dedicated')
+@delete_server_bp.route('/delete-paper-dedicated')
 @cross_origin(supports_credentials=True)
 def delete_dedicated():
     # Authentication

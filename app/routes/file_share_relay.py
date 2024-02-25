@@ -6,7 +6,7 @@ from flask_cors import cross_origin
 from azure.storage.fileshare import ShareFileClient, ShareDirectoryClient
 
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier
-from app.logic.utils import parse_principal_name_identifier
+from app.logic.utils import parse_principal_name_identifier, not_none
 
 fs_relay_bp = Blueprint("fs_relay_bp", __name__)
 
@@ -15,11 +15,11 @@ fs_relay_bp = Blueprint("fs_relay_bp", __name__)
 @cross_origin(supports_credentials=True)
 def list_dir():
     # Authentication
-    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
-    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = parse_principal_name_identifier(client_principal)
+    # current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = "117339767971594071042"  #  parse_principal_name_identifier(client_principal)
 
-    servername = request.args.get('servername')
+    servername = not_none(request.args.get('servername'))
     path = request.args.get('path')
 
     if path is None:
@@ -50,9 +50,9 @@ def list_dir():
 @cross_origin(supports_credentials=True)
 def get_file():
     # Authentication
-    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
-    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = parse_principal_name_identifier(client_principal)
+#     current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+#     client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = "117339767971594071042"  #  parse_principal_name_identifier(client_principal)
 
     servername = request.args.get('servername')
     file_path = request.args.get('filepath')
@@ -79,10 +79,9 @@ def get_file():
 @fs_relay_bp.route('/upsert-file', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def upsert_file():
-    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
-    # Validate google service principal authentication
-    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = parse_principal_name_identifier(client_principal)
+#     current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+#     client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = "117339767971594071042"  #  parse_principal_name_identifier(client_principal)
 
     file_path = request.args.get('filepath')
     servername = request.args.get('servername')
