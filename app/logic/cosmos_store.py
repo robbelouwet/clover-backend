@@ -60,8 +60,10 @@ def find_user_server_by_google_nameidentifier(nameidentifier: str, server_name: 
                                    {'enableCrossPartitionQuery': True})
 
     results = [doc for doc in result_set]
-    if len(results) == 0: return None
-    elif len(results) > 1: raise ValueError("Cosmos query returned multiple hits!")
+    if len(results) == 0:
+        return None
+    elif len(results) > 1:
+        raise ValueError("Cosmos query returned multiple hits!")
     return results[0]
 
 

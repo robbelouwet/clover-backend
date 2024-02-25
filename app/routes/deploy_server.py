@@ -59,7 +59,7 @@ def deploy_dedicated():
     if dry_run is not None: return jsonify({}), 200 if response else jsonify({}), 500
 
     # Upsert with deployment-relevant information
-    user_server = user_server.update({
+    user_server.update({
         "provisioned": True,
         "server_host": response["properties"]["outputs"]["host"]["value"].split(':')[0],
         "server_port": port,
@@ -69,6 +69,7 @@ def deploy_dedicated():
         "capp_name": response["properties"]["outputs"]["cappName"]["value"],
         "st_def_name": response["properties"]["outputs"]["stDefName"]["value"]
     })
+    current_app.logger.debug(f"Upserting updated entry: {user_server}")
     upsert_server_entity(user_server)
 
     # Return response
