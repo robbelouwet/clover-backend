@@ -1,6 +1,8 @@
 from azure.cosmos.cosmos_client import CosmosClient
 import os
 
+from flask import current_app
+
 
 def get_cosmos_client() -> CosmosClient:
     # cs = os.environ.get("CLIENT_SECRET")
@@ -49,6 +51,8 @@ def find_user_server_by_google_nameidentifier(nameidentifier: str, server_name: 
     q = (f'SELECT * FROM c WHERE c.primary_oauth_account.id = "{nameidentifier}" ' +
          f'AND c.server_name = "{server_name}"')
 
+    current_app.logger.info(f"Query: {q}")
+
     database_id = os.environ.get("COSMOS_DB_NAME")
     container_id = os.environ.get("COSMOS_SERVERS_CONTAINER_NAME")
 
@@ -65,6 +69,8 @@ def find_first_user_server() -> dict:
     client = get_cosmos_client()
 
     q = f'SELECT TOP 1 * FROM c'
+
+    current_app.logger.info(f"Query: {q}")
 
     database_id = os.environ.get("COSMOS_DB_NAME")
     container_id = os.environ.get("COSMOS_SERVERS_CONTAINER_NAME")
