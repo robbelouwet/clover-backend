@@ -67,10 +67,10 @@ def find_user_server_by_google_nameidentifier(nameidentifier: str, server_name: 
     return results[0]
 
 
-def find_first_user_server() -> dict:
+def find_all_user_servers_by_google_nameidentifier(nameidentifier: str):
     client = get_cosmos_client()
 
-    q = f'SELECT TOP 1 * FROM c'
+    q = f'SELECT * FROM c WHERE c.primary_oauth_account.id = "{nameidentifier}"'
 
     current_app.logger.info(f"Query: {q}")
 
@@ -83,6 +83,25 @@ def find_first_user_server() -> dict:
     results = [doc for doc in result_set]
     if len(results) == 0:
         return None
-    elif len(results) > 1:
-        raise ValueError("Cosmos query returned multiple hits!")
-    return results[0]
+    return results
+
+
+# def find_first_user_server() -> dict:
+#     client = get_cosmos_client()
+#
+#     q = f'SELECT TOP 1 * FROM c'
+#
+#     current_app.logger.info(f"Query: {q}")
+#
+#     database_id = os.environ.get("COSMOS_DB_NAME")
+#     container_id = os.environ.get("COSMOS_SERVERS_CONTAINER_NAME")
+#
+#     result_set = client.QueryItems("dbs/" + database_id + "/colls/" + container_id, q,
+#                                    {'enableCrossPartitionQuery': True})
+#
+#     results = [doc for doc in result_set]
+#     if len(results) == 0:
+#         return None
+#     elif len(results) > 1:
+#         raise ValueError("Cosmos query returned multiple hits!")
+#     return results[0]

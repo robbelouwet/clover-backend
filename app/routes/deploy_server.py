@@ -37,6 +37,7 @@ def deploy_dedicated():
                                  f"allowed values of [cpu, memory] are: {allowed_values}"}), 400
 
     # Upsert ahead of deployment to avoid re-deploying the same server before the deployment succeeds
+    current_app.logger.info(f"Upserting ahead of deployment...")
     user_server_id = str(uuid.uuid4())
     user_server = {
         "id": user_server_id,
@@ -52,6 +53,7 @@ def deploy_dedicated():
     upsert_server_entity(user_server)
 
     # Perform deployment
+    current_app.logger.info(f"Deploying resources")
     capp_env = not_none(os.environ.get("CAPP_ENVIRONMENT_NAME"))
     response, port, deployment_name = deploy_user_server(servername, dry_run, memory, vcpu)
     current_app.logger.info(f"response: {response}")
