@@ -9,7 +9,7 @@ from app.logic.utils import az_cli, not_none
 
 def delete_user_server(user_server):
     # Delete the container
-    rg = os.environ.get("ST_ACC_RG")
+    rg = os.environ.get("RG")
     command1 = f'containerapp delete -g {rg} -n {user_server["capp_name"]} --yes'
     current_app.logger.info(f"executing: {command1}")
     az_cli(command1)
@@ -36,7 +36,7 @@ def delete_user_server(user_server):
 
 
 def deploy_user_server(servername, dry_run, memory, vcpu):
-    rg = not_none(os.environ.get("ST_ACC_RG"))
+    rg = not_none(os.environ.get("RG"))
     capp_env = not_none(os.environ.get("CAPP_ENVIRONMENT_NAME"))
     st_acc_name = not_none(os.environ.get("ST_ACC_NAME"))
     port = random.randint(49152, 65535)  # a random unreserved port
@@ -53,3 +53,17 @@ def deploy_user_server(servername, dry_run, memory, vcpu):
     except Exception as e:
         raise e
         # TODO: find out resource names without arm template in order to ensure deletion
+
+
+def get_replica_count(capp_name: str):
+    rg = not_none(os.environ.get("RG"))
+
+    response = az_cli(f'containerapp revision list '
+                      f'--name {capp_name} '
+                      f'--resource-group {rg} '
+                      f'--all')
+
+    if len(response) != 1:
+        raise ValueError(f"Container app has more than 1 replica: {response}")
+
+    return int(response[0]["properties"]["replicas"])

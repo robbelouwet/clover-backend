@@ -3,6 +3,7 @@ import os
 from flask import Blueprint, request, jsonify, current_app, json
 from flask_cors import cross_origin
 
+from app.logic.arm_store import get_replica_count
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier, \
     find_all_user_servers_by_google_nameidentifier
 from app.logic.utils import parse_principal_name_identifier, not_none
@@ -10,6 +11,7 @@ from app.logic.utils import parse_principal_name_identifier, not_none
 # get_server_bp = Blueprint("get_server_bp", __name__)
 get_user_server_bp = Blueprint("get_user_server_bp", __name__)
 get_all_user_servers_bp = Blueprint("get_all_user_servers_bp", __name__)
+get_server_state_bp = Blueprint("get_server_state_bp", __name__)
 
 
 @get_user_server_bp.route('/get-user-server')
@@ -29,7 +31,7 @@ def get_user_server():
 
 @get_all_user_servers_bp.route('/get-all-user-servers')
 @cross_origin(supports_credentials=True)
-def get_user_server():
+def get_all_user_servers():
     # Authentication
     current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
     client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
@@ -37,3 +39,25 @@ def get_user_server():
     current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
 
     return jsonify(find_all_user_servers_by_google_nameidentifier(google_name_identifier)), 200
+
+
+@get_server_state_bp.route('/get-server-state')
+@cross_origin(supports_credentials=True)
+def get_server_state():
+    # Authentication
+    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
+    current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
+
+    # Querystring param
+    servername = not_none(request.args.get("servername"))
+
+    # Get the server
+    server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+
+    count = get_replica_count(server["capp_name"])
+
+    return jsonify({
+        "running": True if count != 0 else False
+    }), 200

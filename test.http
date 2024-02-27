@@ -25,3 +25,6 @@ GET http://localhost:5000/delete-dedicated?servername=robbe
 
 GET http://localhost:5000/get-server
 
+###
+
+GET http://localhost:5000/get-server-state?servername=robbe
