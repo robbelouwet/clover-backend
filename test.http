@@ -15,7 +15,7 @@ Accept: text/plain
 
 ###
 
-GET https://paper-server.whitegrass-d982a648.westeurope.azurecontainerapps.io/deploy-paper-dedicated?cpu=1&memory=2&servername=robbe
+GET http://localhost:5000/deploy-paper-dedicated?cpu=1&memory=2&servername=robbe&dry-run=true
 
 ###
 
@@ -28,3 +28,7 @@ GET http://localhost:5000/get-server
 ###
 
 GET http://localhost:5000/get-server-state?servername=robbe
+
+###
+
+GET http://localhost:5000/ping-server?servername=robbe

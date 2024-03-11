@@ -49,7 +49,7 @@ def find_user_server_by_google_nameidentifier(nameidentifier: str, server_name: 
     client = get_cosmos_client()
 
     q = (f'SELECT * FROM c WHERE c.primary_oauth_account.id = "{nameidentifier}" ' +
-         f'AND c.server_name = "{server_name}"')
+         f'AND c.server_name = "{server_name}" AND c.provisioned = true')
 
     current_app.logger.info(f"Query: {q}")
 
@@ -70,7 +70,7 @@ def find_user_server_by_google_nameidentifier(nameidentifier: str, server_name: 
 def find_all_user_servers_by_google_nameidentifier(nameidentifier: str):
     client = get_cosmos_client()
 
-    q = f'SELECT * FROM c WHERE c.primary_oauth_account.id = "{nameidentifier}"'
+    q = f'SELECT * FROM c WHERE c.primary_oauth_account.id = "{nameidentifier}" AND c.provisioned = true'
 
     current_app.logger.info(f"Query: {q}")
 
@@ -80,10 +80,7 @@ def find_all_user_servers_by_google_nameidentifier(nameidentifier: str):
     result_set = client.QueryItems("dbs/" + database_id + "/colls/" + container_id, q,
                                    {'enableCrossPartitionQuery': True})
 
-    results = [doc for doc in result_set]
-    if len(results) == 0:
-        return None
-    return results
+    return [doc for doc in result_set]
 
 
 # def find_first_user_server() -> dict:

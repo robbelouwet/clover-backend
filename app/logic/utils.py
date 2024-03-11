@@ -1,6 +1,9 @@
+import base64
 import os
 
+import flask
 from azure.cli.core import get_default_cli
+from flask import current_app, json
 
 from app.logic.cosmos_store import get_cosmos_client
 
@@ -24,6 +27,21 @@ def az_cli(args_str):
     elif cli.result.error:
         raise cli.result.error
     return True
+
+
+def authenticate(r: flask.Request) -> (bool, str, dict):
+    # return True, "117339767971594071042", {}
+
+    header = r.headers.get('x-ms-client-principal')
+    if header is None:
+        return False, None, None
+
+    current_app.logger.info(f"x-ms-client-principal: {header}")
+    client_principal = json.loads(base64.b64decode(header))
+    google_name_identifier = parse_principal_name_identifier(client_principal)
+    current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
+
+    return True, google_name_identifier, client_principal
 
 
 def not_none(val) -> any:

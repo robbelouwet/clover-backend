@@ -1,5 +1,6 @@
 import os
 import random
+import time
 
 from flask import current_app
 
@@ -8,19 +9,12 @@ from app.logic.utils import az_cli, not_none
 
 
 def delete_user_server(user_server):
-    # Delete the container
     rg = os.environ.get("RG")
+
+    # Delete the container app
     command1 = f'containerapp delete -g {rg} -n {user_server["capp_name"]} --yes'
     current_app.logger.info(f"executing: {command1}")
     az_cli(command1)
-
-    # Delete the file share
-    command2 = f'storage share delete ' + \
-               f'--account-name {user_server["st_acc_name"]} ' + \
-               f'--name {user_server["share"]} ' + \
-               f'--fail-not-exist'
-    current_app.logger.info(f"executing: {command2}")
-    az_cli(command2)
 
     # Delete the container app env storage definition
     command3 = f'containerapp env storage remove ' + \
@@ -30,6 +24,14 @@ def delete_user_server(user_server):
                f'--yes'
     current_app.logger.info(f"executing: {command3}")
     az_cli(command3)
+
+    # Delete the file share
+    command2 = f'storage share delete ' + \
+               f'--account-name {user_server["st_acc_name"]} ' + \
+               f'--name {user_server["share"]} ' + \
+               f'--fail-not-exist'
+    current_app.logger.info(f"executing: {command2}")
+    az_cli(command2)
 
     # Delete the server entity in the DB
     delete_server_entity(user_server["id"])

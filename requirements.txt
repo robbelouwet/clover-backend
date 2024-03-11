@@ -7,3 +7,4 @@ azure-cosmos==3.2.0
 azure-identity==1.15.0
 python-dotenv==1.0.1
 b64==0.4
+sockets

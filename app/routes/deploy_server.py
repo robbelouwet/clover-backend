@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify, json
 from flask_cors import cross_origin
 from app.logic.arm_store import deploy_user_server
 from app.logic.cosmos_store import upsert_server_entity, find_user_server_by_google_nameidentifier
-from app.logic.utils import allowed_values, parse_principal_name_identifier, not_none
+from app.logic.utils import allowed_values, parse_principal_name_identifier, not_none, authenticate
 from flask import current_app
 
 deploy_server_bp = Blueprint("deploy_dedicated_bp", __name__)
@@ -15,10 +15,12 @@ deploy_server_bp = Blueprint("deploy_dedicated_bp", __name__)
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
     # Authentication
-    current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
-    client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
-    google_name_identifier = parse_principal_name_identifier(client_principal)
-    current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
+    # current_app.logger.info(f"print: x-ms-client-principal: {request.headers.get('x-ms-client-principal')}")
+    # client_principal = json.loads(base64.b64decode(request.headers.get('x-ms-client-principal')))
+    # google_name_identifier = parse_principal_name_identifier(client_principal)
+    # current_app.logger.info(f"google nameidentifier: {google_name_identifier}")
+    success, google_name_identifier, principal = authenticate(request)
+    if not success: return jsonify({}), 401
 
     # Arguments
     memory = int(request.args.get("memory"))
@@ -26,7 +28,7 @@ def deploy_dedicated():
     servername = not_none(request.args.get("servername"))
     dry_run = request.args.get("dry-run", default=None)
 
-    # Ensure that foreign key [nameidentifier, servername] doesn't already exist
+    # Ensure that the combination [nameidentifier, servername] doesn't already exist
     existing = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
     if existing is not None: return jsonify(
         {"error": "User already has a server with this name!"}), 400  # Upload server data to cosmos
@@ -46,7 +48,7 @@ def deploy_dedicated():
         "primary_oauth_account": {
             "provider": "google",
             "id": google_name_identifier,
-            "google": client_principal
+            "google": principal
         },
         "oauth_accounts": []
     }
