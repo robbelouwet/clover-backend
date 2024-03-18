@@ -29,7 +29,7 @@ def az_cli(args_str) -> dict:
 
 
 def authenticate(r: flask.Request) -> (bool, str, dict):
-    return True, "117339767971594071042", {}
+    #return True, "117339767971594071042", {}
 
     header = r.headers.get('x-ms-client-principal')
     if header is None:
