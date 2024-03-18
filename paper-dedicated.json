@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.24.24.22086",
-      "templateHash": "5722801526469944518"
+      "templateHash": "15946113614830791799"
     }
   },
   "parameters": {
@@ -24,6 +24,9 @@
     "exposedServerPort": {
       "type": "int",
       "defaultValue": 25565
+    },
+    "velocitySecret": {
+      "type": "string"
     },
     "memoryMB": {
       "type": "int",
@@ -76,15 +79,13 @@
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('cappEnvName'))]",
         "configuration": {
           "ingress": {
-            "external": true,
+            "external": false,
             "targetPort": 25565,
-            "exposedPort": "[parameters('exposedServerPort')]",
             "transport": "Tcp",
             "additionalPortMappings": [
               {
-                "exposedPort": "[add(parameters('exposedServerPort'), 1)]",
                 "targetPort": 8765,
-                "external": true
+                "external": false
               }
             ],
             "traffic": [
@@ -104,6 +105,10 @@
                 {
                   "name": "JVM_ARGS",
                   "value": "[format('-Xms{0}M -Xmx{1}M', mul(div(parameters('memoryMB'), 100), 5), mul(div(parameters('memoryMB'), 100), 95))]"
+                },
+                {
+                  "name": "VELOCITY_SECRET",
+                  "value": "[parameters('velocitySecret')]"
                 }
               ],
               "resources": {
@@ -621,7 +626,7 @@
   "outputs": {
     "host": {
       "type": "string",
-      "value": "[format('{0}:{1}', reference(resourceId('Microsoft.App/containerApps', variables('cappName')), '2023-05-02-preview').configuration.ingress.fqdn, reference(resourceId('Microsoft.App/containerApps', variables('cappName')), '2023-05-02-preview').configuration.ingress.exposedPort)]"
+      "value": "[reference(resourceId('Microsoft.App/containerApps', variables('cappName')), '2023-05-02-preview').configuration.ingress.fqdn]"
     },
     "cappName": {
       "type": "string",

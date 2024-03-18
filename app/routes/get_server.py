@@ -82,4 +82,4 @@ def ping_server():
     #     if count == 0:
     #         return jsonify({}), 204
 
-    return jsonify(ping(server["server_host"], int(server["server_port"]))), 200
+    return jsonify(ping(server["server_host"])), 200

@@ -44,6 +44,8 @@ def deploy_user_server(servername, dry_run, memory, vcpu):
     port = random.randint(49152, 65535)  # a random unreserved port
     deployment_name = f'{servername}-paper-dedicated-deployment'
 
+    velocity_secret = not_none(os.environ.get("VELOCITY_SECRET"))
+
     try:
         return az_cli(f'deployment group {"what-if" if dry_run is not None else "create"} ' +
                       f'-n {deployment_name} ' +
@@ -51,7 +53,7 @@ def deploy_user_server(servername, dry_run, memory, vcpu):
                       f'--template-file paper-dedicated.json ' +
                       f'--parameters appName=paper ' +
                       f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} exposedServerPort={port} ' +
-                      f'memoryMB={memory * 1024} vcpu={vcpu}'), port, deployment_name
+                      f'memoryMB={memory * 1024} vcpu={vcpu} velocitySecret={velocity_secret}'), port, deployment_name
     except Exception as e:
         raise e
         # TODO: find out resource names without arm template in order to ensure deletion

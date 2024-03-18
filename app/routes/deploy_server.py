@@ -65,8 +65,7 @@ def deploy_dedicated():
     # Upsert with deployment-relevant information
     user_server.update({
         "provisioned": True,
-        "server_host": response["properties"]["outputs"]["host"]["value"].split(':')[0],
-        "server_port": port,
+        "server_host": response["properties"]["outputs"]["host"]["value"],
         "st_acc_name": response["properties"]["outputs"]["stAccName"]["value"],
         "share": response["properties"]["outputs"]["shareName"]["value"],
         "capp_env_name": capp_env,

@@ -1,4 +1,0 @@
-{
-  "code": "BadRequest",
-  "message": {"Errors":["PartitionKey extracted from document doesn't match the one specified in the header. Learn more: https:\\/\\/aka.ms\\/CosmosDB\\/sql\\/errors\\/wrong-pk-value"]}
-}
