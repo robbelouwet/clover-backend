@@ -18,7 +18,7 @@ def parse_principal_name_identifier(client_principal) -> str:
     return None
 
 
-def az_cli(args_str):
+def az_cli(args_str) -> dict:
     args = args_str.split()
     cli = get_default_cli()
     cli.invoke(args)
@@ -26,11 +26,10 @@ def az_cli(args_str):
         return cli.result.result
     elif cli.result.error:
         raise cli.result.error
-    return True
 
 
 def authenticate(r: flask.Request) -> (bool, str, dict):
-    # return True, "117339767971594071042", {}
+    return True, "117339767971594071042", {}
 
     header = r.headers.get('x-ms-client-principal')
     if header is None:

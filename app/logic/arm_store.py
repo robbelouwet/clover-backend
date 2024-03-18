@@ -48,7 +48,7 @@ def deploy_user_server(servername, dry_run, memory, vcpu):
         return az_cli(f'deployment group {"what-if" if dry_run is not None else "create"} ' +
                       f'-n {deployment_name} ' +
                       f'--resource-group {rg} ' +
-                      f'--template-file dedicated-server.json ' +
+                      f'--template-file paper-dedicated.json ' +
                       f'--parameters appName=paper ' +
                       f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} exposedServerPort={port} ' +
                       f'memoryMB={memory * 1024} vcpu={vcpu}'), port, deployment_name
@@ -69,3 +69,18 @@ def get_replica_count(capp_name: str):
         raise ValueError(f"Container app has more than 1 replica: {response}")
 
     return int(response[0]["properties"]["replicas"])
+
+
+def get_server_uptime(capp_name: str, date_from: str, date_to: str):
+
+    rg = not_none(os.environ.get("RG"))
+
+    return az_cli(f'az monitor metrics list '
+                      f'--resource {capp_name} '
+                      f'--resource-group {rg} '
+                      f'--resource-type /Microsoft.App/containerApps '
+                      f'--aggregation average '
+                      f'--metric "Replicas" '
+                      f'--interval "PT1H" '
+                      f'--start-time {date_from} '
+                      f'--end-time {date_to}')

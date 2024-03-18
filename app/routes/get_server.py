@@ -3,7 +3,6 @@ import os
 from flask import Blueprint, request, jsonify, current_app, json
 from flask_cors import cross_origin
 
-from app.logic.arm_store import get_replica_count
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier, \
     find_all_user_servers_by_google_nameidentifier
 from app.logic.mc_ping import ping

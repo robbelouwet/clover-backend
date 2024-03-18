@@ -11,7 +11,7 @@ from flask import current_app
 deploy_server_bp = Blueprint("deploy_dedicated_bp", __name__)
 
 
-@deploy_server_bp.route('/deploy-paper-dedicated')
+@deploy_server_bp.route('/deploy')
 @cross_origin(supports_credentials=True)
 def deploy_dedicated():
     # Authentication
@@ -23,9 +23,9 @@ def deploy_dedicated():
     if not success: return jsonify({}), 401
 
     # Arguments
-    memory = int(request.args.get("memory"))
-    vcpu = int(request.args.get("cpu"))
-    servername = not_none(request.args.get("servername"))
+    memory = not_none(int(request.args.get("memory")))
+    vcpu = not_none(int(request.args.get("cpu")))
+    servername = not_none(not_none(request.args.get("servername")))
     dry_run = request.args.get("dry-run", default=None)
 
     # Ensure that the combination [nameidentifier, servername] doesn't already exist

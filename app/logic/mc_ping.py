@@ -95,6 +95,5 @@ def ping(ip, port=25565) -> dict:
     finally:
         sock.close()
 
-
 # if __name__ == '__main__':
 #     print(ping("capp-paper-robbe-server--qusjfqf.whitegrass-d982a648.westeurope.azurecontainerapps.io", 54198))

@@ -32,3 +32,8 @@ GET http://localhost:5000/get-server-state?servername=robbe
 ###
 
 GET http://localhost:5000/ping-server?servername=robbe
+
+###
+
+GET http://localhost:5000/get-uptime?servername=robbe&from=2024-03-16&to=2024-03-17
+
