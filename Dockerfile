@@ -3,7 +3,7 @@ FROM --platform=linux/amd64 python:3.9.18
 
 # Copy all the files from the current directory into the container
 COPY app/ app/
-COPY paper-dedicated.json dedicated-server.json
+COPY paper-dedicated.json paper-dedicated.json
 COPY entrypoint.sh entrypoint.sh
 COPY start.py start.py
 COPY requirements.txt .
