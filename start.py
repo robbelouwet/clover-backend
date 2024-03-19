@@ -1,4 +1,6 @@
-from flask import Flask
+import os
+
+from flask import Flask, current_app
 
 from app.routes.delete_server import delete_server_bp
 from app.routes.deploy_server import deploy_server_bp
@@ -26,4 +28,7 @@ app.register_blueprint(redirect_frontend_bp)
 app.register_blueprint(ping_server_bp)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    if os.environ.get('FLASK_DEBUG', False):
+        app.logger.setLevel(10)  # level for debug mode
+
+    app.run(host='0.0.0.0')

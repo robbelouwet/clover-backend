@@ -82,4 +82,5 @@ def ping_server():
     #     if count == 0:
     #         return jsonify({}), 204
 
+    current_app.logger.debug(f"Pinging {server['server_host']}:25565")
     return jsonify(ping(server["server_host"])), 200
