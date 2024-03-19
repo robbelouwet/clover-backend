@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.24.24.22086",
-      "templateHash": "15946113614830791799"
+      "templateHash": "16401314147864916834"
     }
   },
   "parameters": {
@@ -626,7 +626,7 @@
   "outputs": {
     "host": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.App/containerApps', variables('cappName')), '2023-05-02-preview').configuration.ingress.fqdn]"
+      "value": "[format('{0}.{1}', parameters('cappEnvName'), reference(resourceId('Microsoft.App/managedEnvironments', parameters('cappEnvName')), '2023-05-01').defaultDomain)]"
     },
     "cappName": {
       "type": "string",
