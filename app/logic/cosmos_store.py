@@ -23,6 +23,7 @@ def get_cosmos_client() -> CosmosClient:
 
     # else:
     key = os.environ.get('COSMOS_KEY')
+    current_app.logger.info(f"url: {url}, masterKey: {key}")
     return CosmosClient(url, {'masterKey': key})
 
 
