@@ -63,6 +63,7 @@ def ping(ip, port=25565) -> dict:
                 return i
 
     sock = socket.socket()
+    sock.settimeout(30.0)
     sock.connect((ip, port))
     try:
         host = ip.encode('utf-8')

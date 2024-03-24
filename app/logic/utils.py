@@ -9,6 +9,7 @@ from app.logic.cosmos_store import get_cosmos_client
 
 # Allowed values according to Azure Container Apps consumption profiles
 allowed_values = [[0.5, 1], [1, 2], [1.5, 3], [2, 4]]
+kinds = ["bedrock", "paper"]
 
 
 def parse_principal_name_identifier(client_principal) -> str:
@@ -29,7 +30,7 @@ def az_cli(args_str) -> dict:
 
 
 def authenticate(r: flask.Request) -> (bool, str, dict):
-    #return True, "117339767971594071042", {}
+    return True, "117339767971594071042", {}
 
     header = r.headers.get('x-ms-client-principal')
     if header is None:

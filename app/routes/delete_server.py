@@ -2,7 +2,7 @@ import base64
 from flask import Blueprint, request, jsonify, json, current_app
 from flask_cors import cross_origin
 
-from app.logic.arm_store import delete_user_server
+from app.logic.arm_store import delete_java_user_server, delete_bedrock_user_server
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier
 from app.logic.utils import parse_principal_name_identifier, authenticate
 
@@ -21,6 +21,9 @@ def delete_dedicated():
     user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
 
     # Delete
-    delete_user_server(user_server)
+    if user_server["kind"] == "bedrock":
+        delete_bedrock_user_server(user_server)
+    else:
+        delete_java_user_server(user_server)
 
     return jsonify({}), 200
