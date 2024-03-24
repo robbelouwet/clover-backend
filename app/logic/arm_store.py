@@ -95,7 +95,7 @@ def deploy_user_server(servername, kind, dry_run, memory, vcpu):
     capp_env = not_none(os.environ.get("CAPP_ENVIRONMENT_NAME"))
     st_acc_name = not_none(os.environ.get("ST_ACC_NAME"))
     port = random.randint(49152, 65535)  # a random unreserved port
-    deployment_name = f'{servername}-paper-dedicated-deployment'
+    deployment_name = f'{servername}-{kind}-dedicated-deployment'
 
     velocity_secret = not_none(os.environ.get("VELOCITY_SECRET"))
 
@@ -105,7 +105,7 @@ def deploy_user_server(servername, kind, dry_run, memory, vcpu):
                           f'-n {deployment_name} ' +
                           f'--resource-group {rg} ' +
                           f'--template-file bedrock-dedicated.json ' +
-                          f'--parameters appName=paper ' +
+                          f'--parameters appName=bedrock ' +
                           f'storageName={st_acc_name} servername={servername} ' +
                           f'memoryMB={memory * 1024} vcpu={vcpu}'), port, deployment_name
         else:
