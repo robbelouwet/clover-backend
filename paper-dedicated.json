@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.24.24.22086",
-      "templateHash": "6408123181042138041"
+      "templateHash": "9406079293371950104"
     }
   },
   "parameters": {
@@ -26,6 +26,9 @@
       "defaultValue": 25565
     },
     "velocitySecret": {
+      "type": "string"
+    },
+    "dnsZone": {
       "type": "string"
     },
     "memoryMB": {
@@ -73,7 +76,7 @@
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2023-05-02-preview",
-      "name": "[variables('cappName')]",
+      "name": "[parameters('servername')]",
       "location": "[variables('location')]",
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('cappEnvName'))]",
@@ -149,6 +152,20 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.App/managedEnvironments/storages', parameters('cappEnvName'), variables('stDefName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/dnsZones/CNAME",
+      "apiVersion": "2018-05-01",
+      "name": "[format('{0}/{1}', parameters('dnsZone'), parameters('servername'))]",
+      "properties": {
+        "TTL": 3600,
+        "CNAMERecord": {
+          "cname": "[format('{0}.{1}', parameters('servername'), reference(resourceId('Microsoft.App/managedEnvironments', parameters('cappEnvName')), '2023-05-01').defaultDomain)]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/containerApps', parameters('servername'))]"
       ]
     },
     {
@@ -626,15 +643,15 @@
   "outputs": {
     "host": {
       "type": "string",
-      "value": "[format('{0}.{1}', variables('cappName'), reference(resourceId('Microsoft.App/managedEnvironments', parameters('cappEnvName')), '2023-05-01').defaultDomain)]"
+      "value": "[format('{0}.{1}', parameters('servername'), parameters('dnsZone'))]"
     },
     "cappName": {
       "type": "string",
-      "value": "[variables('cappName')]"
+      "value": "[parameters('servername')]"
     },
     "shareName": {
       "type": "string",
-      "value": "[variables('fileShareName')]"
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', format('{0}-deployment', variables('fileShareName'))), '2022-09-01').outputs.name.value]"
     },
     "stDefName": {
       "type": "string",

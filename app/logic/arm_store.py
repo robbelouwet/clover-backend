@@ -10,6 +10,8 @@ from app.logic.utils import az_cli, not_none
 
 def delete_java_user_server(user_server):
     rg = os.environ.get("RG")
+    record_name = user_server["server_host"].split(".")[0]
+    record_zone = '.'.join(user_server["server_host"].split('.')[1:])
 
     # Delete the container app
     command1 = f'containerapp delete -g {rg} -n {user_server["capp_name"]} --yes'
@@ -33,12 +35,22 @@ def delete_java_user_server(user_server):
     current_app.logger.info(f"executing: {command2}")
     az_cli(command2)
 
+    # Delete the DNS cname record
+    command3 = (f"network dns record-set cname delete "
+                f"--resource-group {rg} "
+                f"--zone-name {record_zone} "
+                f"--name {record_name} --yes")
+    current_app.logger.info(f"executing: {command3}")
+    az_cli(command3)
+
     # Delete the server entity in the DB
     delete_server_entity(user_server["id"])
 
 
 def delete_bedrock_user_server(user_server):
     rg = os.environ.get("RG")
+    record_name = user_server["server_host"].split(".")[0]
+    record_zone = '.'.join(user_server["server_host"].split('.')[1:])
 
     # Delete the container instance
     command1 = f'container delete -g {rg} -n {user_server["aci_name"]} --yes'
@@ -52,6 +64,14 @@ def delete_bedrock_user_server(user_server):
                f'--fail-not-exist'
     current_app.logger.info(f"executing: {command2}")
     az_cli(command2)
+
+    # Delete the DNS cname record
+    command3 = (f"network dns record-set cname delete "
+                f"--resource-group {rg} "
+                f"--zone-name {record_zone} "
+                f"--name {record_name} --yes")
+    current_app.logger.info(f"executing: {command3}")
+    az_cli(command3)
 
     # Delete the server entity in the DB
     delete_server_entity(user_server["id"])
@@ -92,6 +112,7 @@ def show_bedrock_user_server(user_server):
 
 def deploy_user_server(servername, kind, dry_run, memory, vcpu):
     rg = not_none(os.environ.get("RG"))
+    dns_zone = not_none(os.environ.get("DNS_ZONE"))
     capp_env = not_none(os.environ.get("CAPP_ENVIRONMENT_NAME"))
     st_acc_name = not_none(os.environ.get("ST_ACC_NAME"))
     port = random.randint(49152, 65535)  # a random unreserved port
@@ -101,21 +122,26 @@ def deploy_user_server(servername, kind, dry_run, memory, vcpu):
 
     try:
         if kind == "bedrock":
-            return az_cli(f'deployment group {"what-if" if dry_run is not None else "create"} ' +
-                          f'-n {deployment_name} ' +
-                          f'--resource-group {rg} ' +
-                          f'--template-file bedrock-dedicated.json ' +
-                          f'--parameters appName=bedrock ' +
-                          f'storageName={st_acc_name} servername={servername} ' +
-                          f'memoryMB={memory * 1024} vcpu={vcpu}'), port, deployment_name
+            command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
+                      f'-n {deployment_name} ' + \
+                      f'--resource-group {rg} ' + \
+                      f'--template-file bedrock-dedicated.json ' + \
+                      f'--parameters appName=bedrock ' + \
+                      f'storageName={st_acc_name} servername={servername} dnsZone={dns_zone} ' + \
+                      f'memoryMB={memory * 1024} vcpu={vcpu}'
+            current_app.logger.info(f"Deploying: {command}")
+            return az_cli(command), port, deployment_name
         else:
-            return az_cli(f'deployment group {"what-if" if dry_run is not None else "create"} ' +
-                          f'-n {deployment_name} ' +
-                          f'--resource-group {rg} ' +
-                          f'--template-file paper-dedicated.json ' +
-                          f'--parameters appName=paper ' +
-                          f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} exposedServerPort={port} ' +
-                          f'memoryMB={memory * 1024} vcpu={vcpu} velocitySecret={velocity_secret}'), port, deployment_name
+            command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
+                      f'-n {deployment_name} ' + \
+                      f'--resource-group {rg} ' + \
+                      f'--template-file paper-dedicated.json ' + \
+                      f'--parameters appName=paper ' + \
+                      f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} ' \
+                      f'exposedServerPort={port} memoryMB={memory * 1024} vcpu={vcpu} dnsZone={dns_zone} ' \
+                      f'velocitySecret={velocity_secret}'
+            current_app.logger.info(f"Deploying: {command}")
+            return az_cli(command), port, deployment_name
     except Exception as e:
         raise e
         # TODO: find out resource names without arm template in order to ensure deletion

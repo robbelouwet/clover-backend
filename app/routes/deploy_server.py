@@ -21,7 +21,7 @@ def deploy_dedicated():
     # Arguments
     memory = not_none(int(request.args.get("memory")))
     vcpu = not_none(int(request.args.get("cpu")))
-    kind = request.args.get("kind", "paper")
+    kind = request.args.get("kind", "java")
     servername = not_none(not_none(request.args.get("servername")))
     dry_run = request.args.get("dry-run", default=None)
 

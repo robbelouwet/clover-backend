@@ -104,7 +104,6 @@ def poll_bedrock_server():
 
     # Ping the bedrock server
     result = ping_unconnected_bedrock(server["server_host"], 25565)
-    del result["gameId"]  # not properly decoded cuz Im lazy
 
     # layout in same structure as a java ping for front-end
     return jsonify({

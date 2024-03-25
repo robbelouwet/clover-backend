@@ -30,7 +30,7 @@ def ping_unconnected_bedrock(host, port):
 
 if __name__ == "__main__":
     print(json.dumps(ping_unconnected_bedrock(
-        "dns-citroen.fmejaneph2d5cnb8.westeurope.azurecontainer.io",
+        "dns-citroen.chhpcjhcagcpgdfc.westeurope.azurecontainer.io",
         25565
     ), indent=4))
 
