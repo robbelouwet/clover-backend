@@ -8,68 +8,29 @@ from app.logic.cosmos_store import delete_server_entity
 from app.logic.utils import az_cli, not_none
 
 
-def delete_java_user_server(user_server):
-    rg = os.environ.get("RG")
-    record_name = user_server["server_host"].split(".")[0]
-    record_zone = '.'.join(user_server["server_host"].split('.')[1:])
-
-    # Delete the container app
-    command1 = f'containerapp delete -g {rg} -n {user_server["capp_name"]} --yes'
-    current_app.logger.info(f"executing: {command1}")
-    az_cli(command1)
-
-    # Delete the container app env storage definition
-    command3 = f'containerapp env storage remove ' + \
-               f'--name {user_server["capp_env_name"]} ' + \
-               f'--resource-group {rg} ' + \
-               f'--storage-name {user_server["st_def_name"]} ' + \
-               f'--yes'
-    current_app.logger.info(f"executing: {command3}")
-    az_cli(command3)
-
-    # Delete the file share
-    command2 = f'storage share delete ' + \
-               f'--account-name {user_server["st_acc_name"]} ' + \
-               f'--name {user_server["share"]} ' + \
-               f'--fail-not-exist'
-    current_app.logger.info(f"executing: {command2}")
-    az_cli(command2)
-
-    # Delete the DNS cname record
-    command3 = (f"network dns record-set cname delete "
-                f"--resource-group {rg} "
-                f"--zone-name {record_zone} "
-                f"--name {record_name} --yes")
-    current_app.logger.info(f"executing: {command3}")
-    az_cli(command3)
-
-    # Delete the server entity in the DB
-    delete_server_entity(user_server["id"])
-
-
-def delete_bedrock_user_server(user_server):
+def delete_dedicated_user_server(user_server):
     rg = os.environ.get("RG")
     record_name = user_server["server_host"].split(".")[0]
     record_zone = '.'.join(user_server["server_host"].split('.')[1:])
 
     # Delete the container instance
-    command1 = f'container delete -g {rg} -n {user_server["aci_name"]} --yes'
+    command1 = (f'resource delete '
+                f'-g {rg} '
+                f'--ids {user_server["aci_id"]}')
     current_app.logger.info(f"executing: {command1}")
     az_cli(command1)
 
     # Delete the file share
-    command2 = f'storage share delete ' + \
-               f'--account-name {user_server["st_acc_name"]} ' + \
-               f'--name {user_server["share"]} ' + \
-               f'--fail-not-exist'
+    command2 = (f'resource delete '
+                f'-g {rg} '
+                f'--ids {user_server["file_share_id"]}')
     current_app.logger.info(f"executing: {command2}")
     az_cli(command2)
 
     # Delete the DNS cname record
-    command3 = (f"network dns record-set cname delete "
-                f"--resource-group {rg} "
-                f"--zone-name {record_zone} "
-                f"--name {record_name} --yes")
+    command3 = (f'resource delete '
+                f'-g {rg} '
+                f'--ids {user_server["dns_record_id"]}')
     current_app.logger.info(f"executing: {command3}")
     az_cli(command3)
 
@@ -121,30 +82,32 @@ def deploy_user_server(servername, kind, dry_run, memory, vcpu):
     velocity_secret = not_none(os.environ.get("VELOCITY_SECRET"))
 
     try:
-        if kind == "bedrock":
-            command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
-                      f'-n {deployment_name} ' + \
-                      f'--resource-group {rg} ' + \
-                      f'--template-file bedrock-dedicated.json ' + \
-                      f'--parameters appName=bedrock ' + \
-                      f'storageName={st_acc_name} servername={servername} dnsZone={dns_zone} ' + \
-                      f'memoryMB={memory * 1024} vcpu={vcpu}'
-            current_app.logger.info(f"Deploying: {command}")
-            return az_cli(command), port, deployment_name
-        else:
-            command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
-                      f'-n {deployment_name} ' + \
-                      f'--resource-group {rg} ' + \
-                      f'--template-file paper-dedicated.json ' + \
-                      f'--parameters appName=paper ' + \
-                      f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} ' \
-                      f'exposedServerPort={port} memoryMB={memory * 1024} vcpu={vcpu} dnsZone={dns_zone} ' \
-                      f'velocitySecret={velocity_secret}'
-            current_app.logger.info(f"Deploying: {command}")
-            return az_cli(command), port, deployment_name
+        # if kind == "bedrock":
+        command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
+                  f'-n {deployment_name} ' + \
+                  f'--resource-group {rg} ' + \
+                  f'--template-file dedicated-server.json ' + \
+                  f'--parameters appName={kind} storageName={st_acc_name} servername={servername} ' + \
+                  f'dnsZone={dns_zone} memoryMB={memory} vcpu={vcpu}'
+        current_app.logger.info(f"Deploying: {command}")
+        return az_cli(command), port, deployment_name
+    # else:
+    #     command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
+    #               f'-n {deployment_name} ' + \
+    #               f'--resource-group {rg} ' + \
+    #               f'--template-file paper-dedicated.json ' + \
+    #               f'--parameters appName=paper ' + \
+    #               f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} ' \
+    #               f'exposedServerPort={port} memoryMB={memory * 1024} vcpu={vcpu} dnsZone={dns_zone} ' \
+    #               f'velocitySecret={velocity_secret}'
+    #     current_app.logger.info(f"Deploying: {command}")
+    #     return az_cli(command), port, deployment_name
+
     except Exception as e:
         raise e
-        # TODO: find out resource names without arm template in order to ensure deletion
+
+
+# TODO: find out resource names without arm template in order to ensure deletion
 
 
 def get_replica_count(capp_name: str):
