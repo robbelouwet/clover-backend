@@ -3,17 +3,20 @@ import os
 from flask import Blueprint, request, jsonify, current_app, json
 from flask_cors import cross_origin
 
-from app.logic.arm_store import show_bedrock_user_server
+from app.logic.arm_store import show_dedicated_user_server, start_dedicated_user_server, stop_dedicated_user_server
 from app.logic.bedrock_ping import ping_unconnected_bedrock
 from app.logic.cosmos_store import find_user_server_by_google_nameidentifier, \
     find_all_user_servers_by_google_nameidentifier
-from app.logic.java_ping import ping
+from app.logic.java_ping import ping_java
 from app.logic.utils import parse_principal_name_identifier, not_none, authenticate
 
 get_user_server_bp = Blueprint("get_user_server_bp", __name__)
 get_all_user_servers_bp = Blueprint("get_all_user_servers_bp", __name__)
 ping_server_bp = Blueprint("ping_server_bp", __name__)
 poll_bedrock_server_bp = Blueprint("poll_bedrock_server_bp", __name__)
+start_dedicated_server_bp = Blueprint("start_dedicated_server_bp", __name__)
+stop_dedicated_server_bp = Blueprint("stop_dedicated_server_bp", __name__)
+get_server_state_bp = Blueprint("get_server_state_bp", __name__)
 
 
 @get_user_server_bp.route('/get-user-server')
@@ -56,7 +59,13 @@ def ping_java_server():
     current_app.logger.info(f"server: {server}")
 
     current_app.logger.debug(f"Pinging {server['server_host']}:25565")
-    return jsonify(ping(server["server_host"])), 200
+
+    try:
+        resp = ping_java(server["server_host"], 25565)
+    except:
+        return jsonify({"error": "Timeout"}), 500
+
+    return jsonify(resp), 200
 
 
 @poll_bedrock_server_bp.route('/ping-bedrock-server')
@@ -75,7 +84,10 @@ def poll_bedrock_server():
     current_app.logger.info(f"Pinging bedrock server: {server}")
 
     # Ping the bedrock server
-    result = ping_unconnected_bedrock(server["server_host"], 19132 if server["kind"] == "bedrock" else 25565)
+    try:
+        result = ping_unconnected_bedrock(server["server_host"], 19132 )
+    except:
+        return jsonify({"error": "Timeout"}), 500
 
     # layout in same structure as a java ping for front-end
     return jsonify({
@@ -91,3 +103,54 @@ def poll_bedrock_server():
         }
     }), 200
 
+
+@start_dedicated_server_bp.route('/start-dedicated')
+@cross_origin(supports_credentials=True)
+def start_server():
+    # Authentication
+    success, google_name_identifier, principal = authenticate(request)
+    if not success: return jsonify({}), 401
+
+    # Querystring param
+    servername = not_none(request.args.get("servername"))
+
+    # Get the server
+    server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+
+    start_dedicated_user_server(server)
+
+
+@stop_dedicated_server_bp.route('/stop-dedicated')
+@cross_origin(supports_credentials=True)
+def stop_server():
+    # Authentication
+    success, google_name_identifier, principal = authenticate(request)
+    if not success: return jsonify({}), 401
+
+    # Querystring param
+    servername = not_none(request.args.get("servername"))
+
+    # Get the server
+    server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+
+    stop_dedicated_user_server(server)
+
+
+@get_server_state_bp.route('/get-state-dedicated')
+@cross_origin(supports_credentials=True)
+def stop_server():
+    # Authentication
+    success, google_name_identifier, principal = authenticate(request)
+    if not success: return jsonify({}), 401
+
+    # Querystring param
+    servername = not_none(request.args.get("servername"))
+
+    # Get the server
+    server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
+
+    result = show_dedicated_user_server(server)
+
+    return jsonify({
+        'state': result["containers"][0]["instanceView"]["currentState"]["state"]
+    }), 200

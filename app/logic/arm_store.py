@@ -38,35 +38,29 @@ def delete_dedicated_user_server(user_server):
     delete_server_entity(user_server["id"])
 
 
-def stop_bedrock_user_server(user_server):
-    assert user_server["kind"] == "bedrock"
-
+def stop_dedicated_user_server(user_server):
     rg = os.environ.get("RG")
 
     # Stop the container instance
-    command1 = f'container stop -g {rg} -n {user_server["capp_name"]} --yes'
+    command1 = f'container stop -g {rg} -n {user_server["aci_id"].split("/")[-1:][0]}'
     current_app.logger.info(f"executing: {command1}")
     az_cli(command1)
 
 
-def start_bedrock_user_server(user_server):
-    assert user_server["kind"] == "bedrock"
-
+def start_dedicated_user_server(user_server):
     rg = os.environ.get("RG")
 
     # Stop the container instance
-    command1 = f'container start -g {rg} -n {user_server["capp_name"]} --yes'
+    command1 = f'container start -g {rg} -n {user_server["aci_id"].split("/")[-1:][0]}'
     current_app.logger.info(f"executing: {command1}")
     az_cli(command1)
 
 
-def show_bedrock_user_server(user_server):
-    assert user_server["kind"] == "bedrock"
-
+def show_dedicated_user_server(user_server):
     rg = os.environ.get("RG")
 
     # Stop the container instance
-    command1 = f'container show -g {rg} -n {user_server["aci_name"]}'
+    command1 = f'container show -g {rg} -n {user_server["aci_id"].split("/")[-1:][0]}'
     current_app.logger.info(f"executing: {command1}")
     return az_cli(command1)
 

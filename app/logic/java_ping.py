@@ -46,7 +46,7 @@ class Player:
 
 
 # For the rest of requests see wiki.vg/Protocol
-def ping(ip, port=25565) -> dict:
+def ping_java(ip, port=25565) -> dict:
     def read_var_int():
         i = 0
         j = 0
