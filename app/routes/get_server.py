@@ -119,6 +119,8 @@ def start_server():
 
     start_dedicated_user_server(server)
 
+    return jsonify({}), 202
+
 
 @stop_dedicated_server_bp.route('/stop-dedicated')
 @cross_origin(supports_credentials=True)
@@ -134,6 +136,8 @@ def stop_server():
     server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
 
     stop_dedicated_user_server(server)
+
+    return jsonify({}), 202
 
 
 @get_server_state_bp.route('/get-state-dedicated')
