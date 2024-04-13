@@ -28,11 +28,12 @@ def list_dir():
 
     # Get the file share
     user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
-    share = user_server["share"]
+    share = user_server["file_share_id"].split("/")[-1:][0]
 
     current_app.logger.info(f"path: {path}, share: {share}")
 
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
+    conn_string = os.environ.get("D_ST_ACC_CONN_STRING") \
+        if user_server["tier"] == "dedicated" else os.environ.get("C_ST_ACC_CONN_STRING")
     parent_dir = ShareDirectoryClient.from_connection_string(
         conn_str=conn_string,
         share_name=share,
@@ -57,12 +58,13 @@ def get_file():
 
     # Get the file share
     user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
-    share = user_server["share"]
+    share = user_server["file_share_id"].split("/")[-1:][0]
 
     if len(file_path) >= 1 and file_path[0] == '/':
         file_path = file_path[1:]
 
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
+    conn_string = os.environ.get("D_ST_ACC_CONN_STRING") \
+        if user_server["tier"] == "dedicated" else os.environ.get("C_ST_ACC_CONN_STRING")
     file_client = ShareFileClient.from_connection_string(
         conn_str=conn_string, share_name=share, file_path=file_path)
 
@@ -85,14 +87,15 @@ def upsert_file():
 
     # Get the file share
     user_server = find_user_server_by_google_nameidentifier(google_name_identifier, servername)
-    share = user_server["share"]
+    share = user_server["file_share_id"].split("/")[-1:][0]
 
     current_app.logger.info(f"path: {file_path}, share: {share}")
 
     if len(file_path) >= 1 and file_path[0] == '/':
         file_path = file_path[1:]
 
-    conn_string = os.environ.get("ST_ACC_CONN_STRING")
+    conn_string = os.environ.get("D_ST_ACC_CONN_STRING") \
+        if user_server["tier"] == "dedicated" else os.environ.get("C_ST_ACC_CONN_STRING")
     file_client = ShareFileClient.from_connection_string(conn_str=conn_string,
                                                          share_name=share,
                                                          file_path=file_path)

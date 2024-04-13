@@ -136,7 +136,7 @@ def deploy_dedicated():
         "provisioned": True,
         "server_host": f"{servername}.clover-host.com", # TODO: don't hardcode
         "default_host": response["properties"]["outputs"]["defaultHost"]["value"],
-        "consolePort": port,
+        "console_port": port,
 
         "capp_id": response["properties"]["outputs"]["containerAppId"]["value"],
         "file_share_id": response["properties"]["outputs"]["fileShareId"]["value"],
