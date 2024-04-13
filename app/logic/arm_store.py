@@ -8,10 +8,36 @@ from app.logic.cosmos_store import delete_server_entity
 from app.logic.utils import az_cli, not_none
 
 
+def delete_consumption_user_server(user_server):
+    rg = os.environ.get("RG")
+
+    # Delete the container app
+    command1 = (f'resource delete '
+                f'-g {rg} '
+                f'--ids {user_server["capp_id"]}')
+    current_app.logger.info(f"executing: {command1}")
+    az_cli(command1)
+
+    # Delete the file share
+    command2 = (f'resource delete '
+                f'-g {rg} '
+                f'--ids {user_server["storage_def_id"]}')
+    current_app.logger.info(f"executing: {command2}")
+    az_cli(command2)
+
+    # Delete the DNS cname record
+    command3 = (f'resource delete '
+                f'-g {rg} '
+                f'--ids {user_server["file_share_id"]}')
+    current_app.logger.info(f"executing: {command3}")
+    az_cli(command3)
+
+    # Delete the server entity in the DB
+    delete_server_entity(user_server["id"])
+
+
 def delete_dedicated_user_server(user_server):
     rg = os.environ.get("RG")
-    record_name = user_server["server_host"].split(".")[0]
-    record_zone = '.'.join(user_server["server_host"].split('.')[1:])
 
     # Delete the container instance
     command1 = (f'resource delete '
@@ -65,18 +91,14 @@ def show_dedicated_user_server(user_server):
     return az_cli(command1)
 
 
-def deploy_user_server(servername, kind, dry_run, memory, vcpu):
+def deploy_dedicated_user_server(servername, kind, dry_run, memory, vcpu):
     rg = not_none(os.environ.get("RG"))
     dns_zone = not_none(os.environ.get("DNS_ZONE"))
-    capp_env = not_none(os.environ.get("CAPP_ENVIRONMENT_NAME"))
-    st_acc_name = not_none(os.environ.get("ST_ACC_NAME"))
+    st_acc_name = not_none(os.environ.get("D_ST_ACC_NAME"))
     port = random.randint(49152, 65535)  # a random unreserved port
     deployment_name = f'{servername}-{kind}-dedicated-deployment'
 
-    velocity_secret = not_none(os.environ.get("VELOCITY_SECRET"))
-
     try:
-        # if kind == "bedrock":
         command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
                   f'-n {deployment_name} ' + \
                   f'--resource-group {rg} ' + \
@@ -85,23 +107,32 @@ def deploy_user_server(servername, kind, dry_run, memory, vcpu):
                   f'dnsZone={dns_zone} memoryMB={memory} vcpu={vcpu}'
         current_app.logger.info(f"Deploying: {command}")
         return az_cli(command), port, deployment_name
-    # else:
-    #     command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
-    #               f'-n {deployment_name} ' + \
-    #               f'--resource-group {rg} ' + \
-    #               f'--template-file paper-dedicated.json ' + \
-    #               f'--parameters appName=paper ' + \
-    #               f'storageName={st_acc_name} servername={servername} cappEnvName={capp_env} ' \
-    #               f'exposedServerPort={port} memoryMB={memory * 1024} vcpu={vcpu} dnsZone={dns_zone} ' \
-    #               f'velocitySecret={velocity_secret}'
-    #     current_app.logger.info(f"Deploying: {command}")
-    #     return az_cli(command), port, deployment_name
 
     except Exception as e:
         raise e
 
 
-# TODO: find out resource names without arm template in order to ensure deletion
+def deploy_consumption_user_server(servername, dry_run, memory, vcpu):
+    rg = not_none(os.environ.get("RG"))
+    capp_env = not_none(os.environ.get("CAPP_ENVIRONMENT_NAME"))
+    st_acc_name = not_none(os.environ.get("C_ST_ACC_NAME"))
+    port = random.randint(49152, 65535)  # a random unreserved port
+    deployment_name = f'{servername}-consumption-deployment'
+
+    velocity_secret = not_none(os.environ.get("VELOCITY_SECRET"))
+
+    try:
+        command = f'deployment group {"what-if" if dry_run is not None else "create"} ' + \
+                  f'-n {deployment_name} ' + \
+                  f'--resource-group {rg} ' + \
+                  f'--template-file consumption-server.json ' + \
+                  f'--parameters storageName={st_acc_name} servername={servername} cappEnvName={capp_env} ' + \
+                  f'memoryMB={memory} vcpu={vcpu} consolePort={port} velocitySecret={velocity_secret}'
+        current_app.logger.info(f"Deploying: {command}")
+        return az_cli(command), port, deployment_name
+
+    except Exception as e:
+        raise e
 
 
 def get_replica_count(capp_name: str):

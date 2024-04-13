@@ -8,8 +8,9 @@ from flask import current_app, json
 from app.logic.cosmos_store import get_cosmos_client
 
 # Allowed values according to Azure Container Apps consumption profiles
-allowed_values = [[0.5, 1], [1, 2], [1.5, 3], [2, 4]]
-kinds = ["bedrock", "java"]
+allowed_values = [["0.5", "1"], ["1", "2"], ["1.5", "3"], ["2", "4"]]
+dedicated_kinds = ["bedrock", "paper"]
+consumption_kinds = ["paper"]
 
 
 def parse_principal_name_identifier(client_principal) -> str:

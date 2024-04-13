@@ -15,11 +15,11 @@ Accept: text/plain
 
 ###
 
-GET http://localhost:5000/deploy-paper-dedicated?cpu=1&memory=2&servername=robbe&dry-run=true
+GET http://localhost:5000/deploy-consumption?cpu=1.5&memory=3072&servername=robbe4&tier=consumption
 
 ###
 
-GET http://localhost:5000/delete-dedicated?servername=robbe
+GET http://localhost:5000/delete-consumption?servername=robbe4
 
 ###
 
