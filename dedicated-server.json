@@ -5,14 +5,14 @@
     "_generator": {
       "name": "bicep",
       "version": "0.24.24.22086",
-      "templateHash": "17639520956580347109"
+      "templateHash": "7102616891195037050"
     }
   },
   "parameters": {
     "appName": {
       "type": "string",
       "allowedValues": [
-        "java",
+        "paper",
         "bedrock"
       ]
     },
@@ -34,17 +34,14 @@
     },
     "dnsZone": {
       "type": "string"
-    },
-    "image": {
-      "type": "string",
-      "defaultValue": "[if(equals(parameters('appName'), 'java'), 'robbelouwet/paper-dedicated', 'robbelouwet/bedrock-dedicated')]"
     }
   },
   "variables": {
+    "image": "[if(equals(parameters('appName'), 'paper'), 'robbelouwet/paper-dedicated', 'robbelouwet/bedrock-dedicated')]",
     "fileShareName": "[format('fs-{0}-{1}', parameters('appName'), parameters('servername'))]",
     "aciName": "[format('aci-{0}-{1}', parameters('appName'), parameters('servername'))]",
     "volumeName": "[format('volume-{0}-{1}', parameters('appName'), parameters('servername'))]",
-    "gameplayPort": "[if(equals(parameters('appName'), 'java'), 25565, 19132)]",
+    "gameplayPort": "[if(equals(parameters('appName'), 'bedrock'), 19132, 25565)]",
     "consolePort": 8765
   },
   "resources": [
@@ -60,7 +57,7 @@
           "ports": [
             {
               "port": "[variables('gameplayPort')]",
-              "protocol": "[if(equals(parameters('appName'), 'java'), 'TCP', 'UDP')]"
+              "protocol": "[if(equals(parameters('appName'), 'bedrock'), 'UDP', 'TCP')]"
             },
             {
               "port": "[variables('consolePort')]",
@@ -73,11 +70,11 @@
           {
             "name": "server-container",
             "properties": {
-              "image": "[parameters('image')]",
+              "image": "[variables('image')]",
               "ports": [
                 {
                   "port": "[variables('gameplayPort')]",
-                  "protocol": "[if(equals(parameters('appName'), 'java'), 'TCP', 'UDP')]"
+                  "protocol": "[if(equals(parameters('appName'), 'bedrock'), 'UDP', 'TCP')]"
                 },
                 {
                   "port": "[variables('consolePort')]",
@@ -155,6 +152,9 @@
           },
           "enabledProtocols": {
             "value": "SMB"
+          },
+          "shareQuota": {
+            "value": 100
           }
         },
         "template": {
