@@ -27,6 +27,15 @@ def get_cosmos_client() -> CosmosClient:
     return CosmosClient(url, {'masterKey': key})
 
 
+def upsert_email(doc):
+    client = get_cosmos_client()
+
+    database_id = os.environ.get("COSMOS_DB_NAME")
+    container_id = os.environ.get("COSMOS_USERS_CONTAINER_NAME")
+
+    client.UpsertItem("dbs/" + database_id + "/colls/" + container_id, doc)
+
+
 def upsert_server_entity(doc):
     client = get_cosmos_client()
 
@@ -82,7 +91,6 @@ def find_all_user_servers_by_google_nameidentifier(nameidentifier: str):
                                    {'enableCrossPartitionQuery': True})
 
     return [doc for doc in result_set]
-
 
 # def find_first_user_server() -> dict:
 #     client = get_cosmos_client()

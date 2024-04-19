@@ -13,6 +13,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from pathlib import Path
 
+from app.routes.subscribe_info import subscribe_info_bp
+
 load_dotenv(dotenv_path=Path('.dev.env'))
 
 app = Flask(__name__)
@@ -33,6 +35,7 @@ app.register_blueprint(start_dedicated_server_bp)
 app.register_blueprint(stop_dedicated_server_bp)
 app.register_blueprint(get_server_state_bp)
 app.register_blueprint(deploy_consumption_server_bp)
+app.register_blueprint(subscribe_info_bp)
 
 if __name__ == '__main__':
     if os.environ.get('FLASK_DEBUG', False):
